@@ -1,0 +1,21 @@
+{
+  "name": "@motoapp/db",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@fastify/env": "^6.0.0",
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.8"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^6.0.2"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  }
+}
