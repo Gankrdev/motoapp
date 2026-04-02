@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import dbPlugin from './plugins/db.js'
 import jwtPlugin from './plugins/jwt.js'
 import authRoutes from './routes/auth.js'
+import userRoutes from './routes/users.js'
 
 export function buildApp() {
   const app = Fastify({
@@ -11,6 +12,7 @@ export function buildApp() {
   app.register(dbPlugin)
   app.register(jwtPlugin)
   app.register(authRoutes)
+  app.register(userRoutes)
 
   app.get('/health', async () => {
     return { status: 'ok' }
@@ -18,3 +20,4 @@ export function buildApp() {
 
   return app
 }
+
