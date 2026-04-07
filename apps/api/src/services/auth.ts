@@ -1,8 +1,9 @@
 import { randomBytes } from 'crypto'
 import { eq, and, isNull, gt } from 'drizzle-orm'
 import { magicLinks, users } from '@motoapp/db'
+import {  Database } from '@motoapp/db'
 
-export async function createMagicLink(db, email: string) {
+export async function createMagicLink(db: Database, email: string) {
     const token = randomBytes(32).toString('hex')
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
 
@@ -15,7 +16,7 @@ export async function createMagicLink(db, email: string) {
     return token
 }
 
-export async function verifyMagicLink(db, token: string) {
+export async function verifyMagicLink(db: Database, token: string) {
     const [link] = await db
         .select()
         .from(magicLinks)
@@ -38,7 +39,7 @@ export async function verifyMagicLink(db, token: string) {
     return link
 }
 
-export async function findOrCreateUser(db, email: string) {
+export async function findOrCreateUser(db: Database, email: string) {
     const [existing] = await db
         .select()
         .from(users)
@@ -47,7 +48,7 @@ export async function findOrCreateUser(db, email: string) {
 
     console.log('existing:', existing)
 
-    if (existing) return existing
+    if (existing) return { user: existing, isNewUser: false }
 
     const username = email.split('@')[0]
 
@@ -57,6 +58,6 @@ export async function findOrCreateUser(db, email: string) {
         .values({ email, username })
         .returning()
 
-    return result[0]
+    return { user: result[0], isNewUser: true }
 }
 

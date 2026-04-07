@@ -1,8 +1,9 @@
 import fp from 'fastify-plugin'
 import { S3Client } from '@aws-sdk/client-s3'
 import multipart from '@fastify/multipart'
+import { FastifyInstance } from 'fastify'
 
-async function storagePlugin(app) {
+async function storagePlugin(app: FastifyInstance) {
   const s3 = new S3Client({
     region: 'auto',
     endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,

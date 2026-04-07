@@ -1,7 +1,7 @@
 import { eq, desc } from 'drizzle-orm'
-import { posts, users } from '@motoapp/db'
+import { posts, users, Database } from '@motoapp/db'
 
-export async function createPost(db, userId: string, caption: string, mediaUrls?: string[]) {
+export async function createPost(db: Database, userId: string, caption: string, mediaUrls?: string[]) {
   const [post] = await db
     .insert(posts)
     .values({ userId, caption, mediaUrls })
@@ -10,7 +10,7 @@ export async function createPost(db, userId: string, caption: string, mediaUrls?
   return post
 }
 
-export async function getFeed(db, limit: number, offset: number) {
+export async function getFeed(db: Database, limit: number, offset: number) {
   return db
     .select({
       id: posts.id,
@@ -32,7 +32,7 @@ export async function getFeed(db, limit: number, offset: number) {
     .offset(offset)
 }
 
-export async function getPostById(db, id: string) {
+export async function getPostById(db: Database, id: string) {
   const [post] = await db
     .select({
       id: posts.id,
@@ -55,7 +55,7 @@ export async function getPostById(db, id: string) {
   return post ?? null
 }
 
-export async function deletePost(db, id: string, userId: string) {
+export async function deletePost(db: Database, id: string, userId: string) {
   const [deleted] = await db
     .delete(posts)
     .where(eq(posts.id, id))
