@@ -93,6 +93,10 @@ Fase 1 (semanas 1–6): Setup Fastify + PostgreSQL + PostGIS, auth JWT + magic l
 CRUD usuarios y perfiles, upload fotos a R2, feed básico, app mobile con onboarding
 y feed, landing web y perfiles públicos.
 
+## Pendientes post-Fase 1
+- Deep linking para magic links — que al tocar el link en el correo se abra la app y autentique automáticamente (sin copiar/pegar)
+- Refresh tokens — renovación automática de sesión JWT para evitar re-autenticación frecuente
+
 ## Deployment
 - Local: Docker Compose para PostgreSQL, Expo Go + ngrok para mobile
 - Staging: Railway (API) + Vercel preview (web) + EAS internal (mobile)
@@ -128,3 +132,6 @@ explícitamente. En cambio:
 
 El objetivo es que al terminar el proyecto entienda cada decisión técnica,
 no solo que el código funcione.
+
+## Diseño
+Sistema de diseño "Tierra y Musgo" definido en docs/DESIGN.md
