@@ -21,16 +21,22 @@ export default async function userRoutes(app: FastifyInstance) {
 
   // Actualizar perfil propio
   app.patch('/users/me', { onRequest: [authenticate] }, async (request, reply) => {
-    const { username, bio, avatarUrl } = request.body as {
+    console.log('body:', request.body)
+
+
+    const { username, bio, avatarUrl, motoTypes } = request.body as {
       username?: string
       bio?: string
       avatarUrl?: string
+      motoTypes?: string[]
     }
 
-    const updates: Record<string, string> = {}
+    const updates: Partial<typeof users.$inferInsert> = {}
     if (username !== undefined) updates.username = username
     if (bio !== undefined) updates.bio = bio
     if (avatarUrl !== undefined) updates.avatarUrl = avatarUrl
+    if (motoTypes !== undefined) updates.motoTypes = motoTypes
+
 
     if (Object.keys(updates).length === 0) {
       return reply.status(400).send({ error: 'No hay campos para actualizar' })

@@ -2,13 +2,14 @@ import { pgTable, uuid, text, boolean, timestamp, jsonb, integer, real } from 'd
 import { geometry } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
-  id:        uuid('id').primaryKey().defaultRandom(),
-  username:  text('username').notNull().unique(),
-  email:     text('email').notNull().unique(),
-  avatarUrl: text('avatar_url'),
-  bio:       text('bio'),
-  isPremium: boolean('is_premium').default(false).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  id:         uuid('id').primaryKey().defaultRandom(),
+  username:   text('username').notNull().unique(),
+  email:      text('email').notNull().unique(),
+  avatarUrl:  text('avatar_url'),
+  bio:        text('bio'),
+  motoTypes:  jsonb('moto_types').$type<string[]>(),
+  isPremium:  boolean('is_premium').default(false).notNull(),
+  createdAt:  timestamp('created_at').defaultNow().notNull(),
 })
 
 export const posts = pgTable('posts', {

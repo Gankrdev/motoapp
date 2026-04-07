@@ -33,10 +33,10 @@ export default async function authRoutes(app: FastifyInstance) {
       return reply.status(401).send({ error: 'Token inválido o expirado' })
     }
 
-    const user = await findOrCreateUser(app.db, link.email)
+    const { user, isNewUser } = await findOrCreateUser(app.db, link.email)
     const jwt = app.jwt.sign({ userId: user.id }, { expiresIn: '7d' })
 
-    return { token: jwt, user }
+    return { token: jwt, user, isNewUser }
   })
 
 }
