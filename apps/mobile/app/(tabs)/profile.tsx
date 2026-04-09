@@ -1,10 +1,12 @@
-import { View, Text, Image, ScrollView } from 'react-native';
+import { View, Text, Image, ScrollView, Pressable, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../stores/auth-store';
 import { LinearGradient } from 'expo-linear-gradient'
 
+
 export default function ProfileScreen() {
   const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   return (
     <ScrollView className='flex-1 bg-background' contentContainerStyle={{ paddingBottom: 32 }}>
@@ -121,6 +123,55 @@ export default function ProfileScreen() {
         </ScrollView>
 
       </View>
+
+      {/* SECCION: AJUSTES */}
+      <View className='px-4 mb-8'>
+        <View className='bg-card rounded-xl overflow-hidden'>
+          <Pressable
+            onPress={() => { }}
+            className='flex-row items-center justify-between p-4 border-b border-white/10'
+          >
+            <View className='flex-row items-center gap-4'>
+              <Ionicons name="create-outline" size={22} color="#C4C1B1" />
+              <Text className='text-slateText text-base'>Editar Perfil</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#C4C1B1" />
+          </Pressable>
+          <Pressable
+            onPress={() => { }}
+            className='flex-row items-center justify-between p-4 border-b border-white/10'
+          >
+            <View className='flex-row items-center gap-4'>
+              <Ionicons name="lock-closed-outline" size={22} color="#C4C1B1" />
+              <Text className='text-slateText text-base'>Privacidad y seguridad</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#C4C1B1" />
+          </Pressable>
+          <Pressable
+            onPress={() => { }}
+            className='flex-row items-center justify-between p-4 border-b border-white/10'
+          >
+            <View className='flex-row items-center gap-4'>
+              <Ionicons name="help-circle-outline" size={22} color="#C4C1B1" />
+              <Text className='text-slateText text-base'>Ayuda y soporte</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#C4C1B1" />
+          </Pressable>
+          <Pressable
+            onPress={() => Alert.alert('Cerrar sesión', '¿Estás seguro de que quieres cerrar sesión?', [
+              { text: 'Cancelar', style: 'cancel' },
+              { text: 'Cerrar sesión', style: 'destructive', onPress: logout },
+            ])}
+            className='flex-row items-center justify-between p-4'
+          >
+            <View className='flex-row items-center gap-4'>
+              <Ionicons name="log-out-outline" size={22} color="#EF4444" />
+              <Text className='text-red-500 text-base'>Cerrar sesión</Text>
+            </View>
+          </Pressable>
+        </View>
+      </View>
+
     </ScrollView>
   )
 }
