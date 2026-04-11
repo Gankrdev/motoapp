@@ -16,7 +16,7 @@ export function RecordTabButton({ onPress }: BottomTabBarButtonProps) {
           elevation: 8,
         }}
       >
-        <Ionicons name="add" size={32} color="#1A1C18" />
+        <Ionicons name="ellipse" size={24} color="#D63A2A" />
       </Pressable>
     </View>
   )
