@@ -80,6 +80,29 @@ export default function RecordScreen() {
           zoomLevel={14}
         />
         <Mapbox.LocationPuck puckBearingEnabled puckBearing="heading" />
+        {coords.length >= 2 && (
+          <Mapbox.ShapeSource
+            id="route-source"
+            shape={{
+              type: 'Feature',
+              geometry: {
+                type: 'LineString',
+                coordinates: coords,
+              },
+              properties: {},
+            }}
+          >
+            <Mapbox.LineLayer
+              id="route-line"
+              style={{
+                lineColor: '#D63A2A',
+                lineWidth: 4,
+                lineCap: 'round',
+                lineJoin: 'round',
+              }}
+            />
+          </Mapbox.ShapeSource>
+        )}
       </Mapbox.MapView>
       <Pressable
         onPress={() => setIsRecording(!isRecording)}
