@@ -14,7 +14,7 @@ Red social de contenido creativo (fotos, videos, posts) con grabación y publica
 
 ## Servicios externos
 - Stripe — pagos y suscripciones
-- Mapbox — renderizado de rutas GPS
+- Mapbox — renderizado de rutas GPS + Directions API + Navigation SDK
 - Firebase / APNs — push notifications
 - Cloudflare R2 (compatible S3) — almacenamiento de fotos y videos
 
@@ -88,14 +88,43 @@ const nearby = await db
   )`)
   .limit(20)
 
-## Roadmap — fase actual
-Fase 1 (semanas 1–6): Setup Fastify + PostgreSQL + PostGIS, auth JWT + magic link,
+## Roadmap
+
+### Fase 1 (semanas 1–6) — Fundamentos
+Setup Fastify + PostgreSQL + PostGIS, auth JWT + magic link,
 CRUD usuarios y perfiles, upload fotos a R2, feed básico, app mobile con onboarding
 y feed, landing web y perfiles públicos.
+Incluye: **Feature A — Grabación de rutas GPS**
+- expo-location para tracking GPS en background
+- Guardar coordenadas → API → PostGIS (LineString)
+- Mostrar la ruta grabada sobre el mapa después de finalizar
 
-## Pendientes post-Fase 1
-- Deep linking para magic links — que al tocar el link en el correo se abra la app y autentique automáticamente (sin copiar/pegar)
-- Refresh tokens — renovación automática de sesión JWT para evitar re-autenticación frecuente
+### Fase 2 — Planificación de rutas
+**Feature B — Planificador de rutas con Mapbox Directions API**
+- Mapa interactivo: el usuario toca para poner origen/destino/waypoints
+- Opciones de ruta: más directa, sin peajes, sin autopistas, caminos secundarios
+- Mostrar alternativas y que el usuario elija antes de salir
+- Guardar ruta planificada en la DB (reutiliza modelo de routes con campo de tipo)
+- Perfil de cálculo: driving (por defecto), con exclude=toll,motorway como filtros
+
+### Fase 3 — Navegación Roadbook Rally
+**Feature C — Navegación turn-by-turn estilo rally/roadbook**
+- UI de roadbook vertical (NO mapa clásico con línea azul)
+- Cada instrucción tiene 3 columnas: distancia parcial | tulip diagram | notas
+- Instrucción actual: tulip grande y glanceable, distancia restante
+- Lista de próximas instrucciones con scroll automático conforme avanza
+- Datos de telemetría: velocidad, CAP (heading en grados), distancia total, estado GPS
+- Mini-mapa opcional en una esquina
+- Feedback al usuario: beep/vibración en vez de voz (pensado para moto con soporte)
+- Se alimenta de la ruta planificada en Fase 2
+- Mapbox Navigation SDK (@mapbox/navigation-react-native)
+- Manejo de background location, pantalla activa, batería, re-cálculo si se desvía
+
+### Pendientes transversales
+- Deep linking para magic links — que al tocar el link en el correo se abra la app y autentique automáticamente
+- Refresh tokens — renovación automática de sesión JWT
+- Comentarios, likes, notificaciones push
+- Stripe/suscripciones
 
 ## Deployment
 - Local: Docker Compose para PostgreSQL, Expo Go + ngrok para mobile
