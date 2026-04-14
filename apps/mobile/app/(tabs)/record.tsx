@@ -2,16 +2,17 @@ import { useEffect, useState } from 'react'
 import { View, Text, ActivityIndicator, Pressable } from 'react-native'
 import * as Location from 'expo-location'
 import Mapbox from '@rnmapbox/maps'
+import { useRouteStore } from '../../stores/route-store'
 
 Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN!)
 
 export default function RecordScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
-
-  const [isRecording, setIsRecording] = useState(false)
-  const [coords, setCoords] = useState<[number, number][]>([])
-
+  const isRecording = useRouteStore((state) => state.isRecording)
+  const coords = useRouteStore((state) => state.coords)
+  const startRecording = useRouteStore((state) => state.startRecording)
+  const stopRecording = useRouteStore((state) => state.stopRecording)
 
   useEffect(() => {
     async function getLocation() {
@@ -25,31 +26,6 @@ export default function RecordScreen() {
     }
     getLocation()
   }, [])
-
-  useEffect(() => {
-    if (!isRecording) return  // si no estamos grabando, no hagas nada
-
-    setCoords([])  // reset: cada nueva grabación empieza limpia
-
-    let subscription: Location.LocationSubscription | null = null
-
-    Location.watchPositionAsync(
-      {
-        accuracy: Location.Accuracy.BestForNavigation,
-        timeInterval: 1000,
-        distanceInterval: 5,
-      },
-      (loc) => {
-        setCoords(prev => [...prev, [loc.coords.longitude, loc.coords.latitude]])
-      }
-    ).then(sub => {
-      subscription = sub
-    })
-
-    return () => {
-      subscription?.remove()
-    }
-  }, [isRecording])
 
 
   if (errorMsg) {
@@ -105,7 +81,7 @@ export default function RecordScreen() {
         )}
       </Mapbox.MapView>
       <Pressable
-        onPress={() => setIsRecording(!isRecording)}
+        onPress={() => isRecording ? stopRecording() : startRecording()}
         className="absolute bottom-10 self-center px-8 py-4 rounded-full"
         style={{ backgroundColor: isRecording ? '#D63A2A' : '#4A7C59' }}
       >
