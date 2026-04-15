@@ -31,7 +31,16 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "@rnmapbox/maps"
+      "@rnmapbox/maps",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "MotoApp necesita tu ubicación para grabar rutas incluso con la pantalla apagada.",
+          "locationWhenInUsePermission": "MotoApp necesita tu ubicación para grabar rutas.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ]
     ]
   }
 }

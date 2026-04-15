@@ -15,6 +15,7 @@ The palette is rooted in the "Tierra y Musgo" philosophy. It utilizes a Material
 - **Primary (`#316342` to `#4A7C59`):** Represents the deep moss of the forest. Used for core navigation and authoritative actions.
 - **Secondary/Accent (`#835425` to `#FFB74D`):** Earth tones that act as wayfinding markers. These are the "dust and sun" that break the greenery.
 - **Surface & Background (`#FAF3DD`):** A warm, cream base that reduces glare during outdoor use compared to pure white.
+- **Error (`#B84E33 `):** A soft terracotta red that matches the matte palette and doesn't stand out, but clearly shows the flaws.
 
 ### The "No-Line" Rule
 To maintain a high-end, seamless feel, **explicitly prohibit 1px solid borders for sectioning.** Boundaries are defined solely through background color shifts.

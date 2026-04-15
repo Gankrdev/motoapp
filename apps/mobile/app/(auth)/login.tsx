@@ -18,11 +18,17 @@ const BG_IMAGE =
 export default function LoginScreen() {
   const [email, setEmail] = useState('')
   const { sendMagicLink, isLoading } = useAuthStore()
+  const [error, setError] = useState<string | null>(null)
 
   const handleSendMagicLink = async () => {
     if (!email) return
-    await sendMagicLink(email)
-    router.push({ pathname: '/(auth)/verify', params: { email } })
+    setError(null)
+    try {
+      await sendMagicLink(email)
+      router.push({ pathname: '/(auth)/verify', params: { email } })
+    } catch (e) {
+      setError((e as Error).message)
+    }
   }
 
 
@@ -77,6 +83,14 @@ export default function LoginScreen() {
                 }
               </Text>
             </Pressable>
+            {
+              error && (
+                <View className="mt-3">
+                  <Text className="text-error font-extrabold">{error}</Text>
+                </View>
+
+              )
+            }
           </View>
 
           {/* Divider */}

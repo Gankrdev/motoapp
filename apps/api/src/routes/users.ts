@@ -21,8 +21,6 @@ export default async function userRoutes(app: FastifyInstance) {
 
   // Actualizar perfil propio
   app.patch('/users/me', { onRequest: [authenticate] }, async (request, reply) => {
-    console.log('body:', request.body)
-
 
     const { username, bio, avatarUrl, motoTypes } = request.body as {
       username?: string

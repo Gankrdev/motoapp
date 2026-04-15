@@ -42,6 +42,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         body: JSON.stringify({ email }),
       })
       if (!res.ok) throw new Error('Error enviando magic link')
+    } catch (e) {
+      const msg = e instanceof TypeError
+        ? 'Sin conexión. Por favor, verifica tu conexión a internet.'
+        : (e as Error).message
+      throw new Error(msg)
     } finally {
       set({ isLoading: false })
     }
@@ -66,6 +71,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         isNewUser: data.isNewUser,
         isAuthenticated: true,
       })
+    } catch (e) {
+      if (e instanceof TypeError) {
+        throw new Error('Sin conexión. Por favor, verifica tu conexión a internet.')
+      }
+      throw e
     } finally {
       set({ isLoading: false })
     }

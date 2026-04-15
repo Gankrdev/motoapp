@@ -19,28 +19,39 @@ export default function VerifyScreen() {
   const { email } = useLocalSearchParams<{ email: string }>()
   const [token, setToken] = useState('')
   const { verify, sendMagicLink, isLoading } = useAuthStore()
+  const [error, setError] = useState<string | null>(null)
+  const [resendSuccess, setResendSuccess] = useState<boolean>(false)
 
   const handleVerify = async () => {
     if (!token) return
+    setError(null)
+    setResendSuccess(false)
     try {
       await verify(token)
       const { isNewUser } = useAuthStore.getState()
-      console.log('isNewUser:', isNewUser)
       if (isNewUser) {
         router.replace('/(auth)/welcome')
       } else {
         router.replace('/(tabs)/feed')
       }
-    } catch (error) {
-      console.log('Error en verify:', error)
+    } catch (e) {
+      setError((e as Error).message)
     }
   }
 
-
-
   const handleResend = async () => {
     if (!email) return
-    await sendMagicLink(email)
+    setError(null)
+    setResendSuccess(false)
+    try {
+      await sendMagicLink(email)
+      setResendSuccess(true)
+      setTimeout(() => {
+        setResendSuccess(false)
+      }, 3000);
+    } catch (e) {
+      setError((e as Error).message)
+    }
   }
 
   return (
@@ -104,6 +115,22 @@ export default function VerifyScreen() {
                 }
               </Text>
             </Pressable>
+            {
+              resendSuccess && (
+                <View className="mt-3">
+                  <Text className="text-success font-extrabold">Email forward successfully!</Text>
+                </View>
+
+              )
+            }
+            {
+              error && (
+                <View className="mt-3">
+                  <Text className="text-error font-extrabold">{error}</Text>
+                </View>
+
+              )
+            }
           </View>
 
           {/* Resend */}

@@ -18,6 +18,7 @@ module.exports = {
                 secondaryText: "#C4C1B1",
                 info: "#6B8FA8",
                 success: "#5C7A67",
+                error: '#B84E33'
             },
 
         },
