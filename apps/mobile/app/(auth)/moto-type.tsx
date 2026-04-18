@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native'
 import { router } from 'expo-router'
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import { useAuthStore } from '../../stores/auth-store'
+import { useToastStore } from '../../stores/toast-store'
 
 const MOTO_TYPES = [
     { id: 'adventure', label: 'Adventure', subtitle: 'Dual-sport & ADV', icon: 'image-filter-hdr' },
@@ -25,7 +26,13 @@ export default function MotoTypeScreen() {
 
     const handleContinue = async () => {
         if (selected.length > 0) {
-            await updateMotoTypes(selected)
+            try {
+                await updateMotoTypes(selected)
+
+            } catch (e) {
+                useToastStore.getState().show('error', (e as Error).message)
+                return
+            }
         }
         useAuthStore.setState({ isNewUser: false })
         router.replace('/(tabs)/feed')

@@ -2,6 +2,11 @@ import "../global.css"
 import { useState, useEffect } from 'react'
 import { Stack, useSegments, router } from 'expo-router'
 import { useAuthStore } from '../stores/auth-store'
+import { ToastHost } from "../components/ToastHost"
+import { SafeAreaProvider } from "react-native-safe-area-context"
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { queryClient, persister } from '../lib/query-client'
+
 
 export default function RootLayout() {
   const { isAuthenticated, isNewUser, loadToken } = useAuthStore()
@@ -27,5 +32,15 @@ export default function RootLayout() {
 
   }, [isAuthenticated, isNewUser, segments, isReady])
 
-  return <Stack screenOptions={{ headerShown: false }} />
+  return (
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister }}
+    >
+      <SafeAreaProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+        <ToastHost />
+      </SafeAreaProvider>
+    </PersistQueryClientProvider>
+  )
 }

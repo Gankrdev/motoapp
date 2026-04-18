@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import * as SecureStore from 'expo-secure-store'
-
-const API_URL = 'http://192.168.100.2:3000' // Android emulator localhost
+import { api, ApiError } from '../lib/api-client'
 
 interface User {
   id: string
@@ -36,17 +35,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   sendMagicLink: async (email) => {
     set({ isLoading: true })
     try {
-      const res = await fetch(`${API_URL}/auth/magic-link`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      })
-      if (!res.ok) throw new Error('Error enviando magic link')
-    } catch (e) {
-      const msg = e instanceof TypeError
-        ? 'Sin conexión. Por favor, verifica tu conexión a internet.'
-        : (e as Error).message
-      throw new Error(msg)
+      await api('/auth/magic-link', { method: 'POST', body: { email }, auth: false })
     } finally {
       set({ isLoading: false })
     }
@@ -55,27 +44,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   verify: async (code) => {
     set({ isLoading: true })
     try {
-      const res = await fetch(`${API_URL}/auth/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: code }),
-      })
-      if (!res.ok) throw new Error('Token inválido o expirado')
+      const data = await api<{ token: string, user: User, isNewUser: boolean }>('/auth/verify', { method: 'POST', body: { token: code }, auth: false })
 
-      const data = await res.json()
       await SecureStore.setItemAsync('auth_token', data.token)
-
       set({
         token: data.token,
         user: data.user,
         isNewUser: data.isNewUser,
-        isAuthenticated: true,
+        isAuthenticated: true
       })
-    } catch (e) {
-      if (e instanceof TypeError) {
-        throw new Error('Sin conexión. Por favor, verifica tu conexión a internet.')
-      }
-      throw e
     } finally {
       set({ isLoading: false })
     }
@@ -86,39 +63,24 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ token: null, user: null, isAuthenticated: false })
   },
 
+  // 
+
   loadToken: async () => {
     const stored = await SecureStore.getItemAsync('auth_token')
     if (!stored) return
 
     try {
-      const res = await fetch(`${API_URL}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${stored}`,
-        },
-      })
-      if (!res.ok) {
-        //Token inválido, eliminarlo
+      const user = await api<User>('/users/me')
+      set({ token: stored, user, isAuthenticated: true })
+    } catch (e) {
+      if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
         await SecureStore.deleteItemAsync('auth_token')
         return
       }
-      const user = await res.json()
-      set({ token: stored, user, isAuthenticated: true })
-    } catch (error) {
-      //Error de red: dejamos el token pero sin user
-      set({ token: stored, isAuthenticated: false })
     }
   },
 
   updateMotoTypes: async (motoTypes) => {
-    const { token } = useAuthStore.getState()
-    const res = await fetch(`${API_URL}/users/me`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ motoTypes }),
-    })
-    if (!res.ok) throw new Error('Error actualizando tipos de moto')
-  },
+    await api('/users/me', { method: 'PATCH', body: { motoTypes } })
+  }
 }))
