@@ -1,7 +1,15 @@
 {
   "name": "motoapp",
   "private": true,
-  "scripts": {},
+  "version": "1.0.0",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "mobile": "pnpm --filter mobile",
+    "api": "pnpm --filter api",
+    "web": "pnpm --filter web"
+  },
   "devDependencies": {
     "turbo": "^2.9.3"
   }
