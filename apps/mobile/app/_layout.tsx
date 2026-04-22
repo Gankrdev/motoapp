@@ -1,4 +1,5 @@
 import "../global.css"
+import '../lib/location-task'
 import { useState, useEffect } from 'react'
 import { Stack, useSegments, router } from 'expo-router'
 import { useAuthStore } from '../stores/auth-store'
