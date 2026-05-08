@@ -1,5 +1,13 @@
 import { create } from 'zustand'
-import { requestForegroundPermissionsAsync, Accuracy, startLocationUpdatesAsync, stopLocationUpdatesAsync, requestBackgroundPermissionsAsync, } from 'expo-location'
+import {
+    getForegroundPermissionsAsync,
+    requestForegroundPermissionsAsync,
+    getBackgroundPermissionsAsync,
+    requestBackgroundPermissionsAsync,
+    Accuracy,
+    startLocationUpdatesAsync,
+    stopLocationUpdatesAsync,
+} from 'expo-location'
 import { LOCATION_TASK_NAME } from '../lib/location-task-name'
 
 interface RouteState {
@@ -13,25 +21,28 @@ interface RouteState {
     stopRecording: () => Promise<void>
 }
 
-export const useRouteStore = create<RouteState>((set, get) => ({
+export const useRouteStore = create<RouteState>((set) => ({
     isRecording: false,
     coords: [],
 
     addCoord: (coord) => set((state) => ({ coords: [...state.coords, coord] })),
     startRecording: async () => {
-        const fg = await requestForegroundPermissionsAsync()
+        const fgCurrent = await getForegroundPermissionsAsync()
+        const fg = fgCurrent.status === 'granted'
+            ? fgCurrent
+            : await requestForegroundPermissionsAsync()
 
         if (fg.status !== 'granted') {
-            // manejar error — por ahora puedes lanzar o loggear
-            console.log('Permiso foreground denegado');
-            return
+            throw new Error("Necesitamos permiso de ubicación para grabar tu ruta.");
         }
-        const bg = await requestBackgroundPermissionsAsync()
+
+        const bgCurrent = await getBackgroundPermissionsAsync()
+        const bg = bgCurrent.status === 'granted'
+            ? bgCurrent
+            : await requestBackgroundPermissionsAsync()
 
         if (bg.status !== 'granted') {
-            // manejar error — por ahora puedes lanzar o loggear
-            console.log('Permiso background denegado');
-            return
+            throw new Error("Activa la ubicación en modo 'Todo el tiempo' desde Ajustes para grabar con la pantalla apagada.");
         }
 
         set({ isRecording: true, coords: [] })
@@ -47,8 +58,6 @@ export const useRouteStore = create<RouteState>((set, get) => ({
                 notificationColor: '#D63A2A'
             }
         })
-
-
     },
 
     stopRecording: async () => {
