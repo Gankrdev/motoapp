@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import * as Location from 'expo-location'
 import Mapbox from '@rnmapbox/maps'
+import {Ionicons} from '@expo/vector-icons'
 import { useRouteStore } from '../../stores/route-store'
 import { useToastStore } from '../../stores/toast-store'
+import { usePostRoute } from '../../hooks/use-post-route'
 
 Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN!)
 
@@ -14,6 +16,7 @@ export default function RecordScreen() {
   const startRecording = useRouteStore((state) => state.startRecording)
   const stopRecording = useRouteStore((state) => state.stopRecording)
   const [permissionMessage, setPermissionMessage] = useState('')
+  const cameraRef = useRef<Mapbox.Camera>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -31,6 +34,12 @@ export default function RecordScreen() {
         const loc = await Location.getCurrentPositionAsync({})
         if (cancelled) return
         setLocation(loc)
+        cameraRef.current?.setCamera({
+          centerCoordinate: [loc.coords.longitude, loc.coords.latitude],
+          zoomLevel: 15,
+          heading: 0,
+          animationDuration: 800,
+        })
         setPermissionMessage('')
         return
       }
@@ -53,10 +62,30 @@ export default function RecordScreen() {
     }
   }, [])
 
+  const postRoute = usePostRoute()
+  const clearCoords = useRouteStore((s) => s.clearCoords)
+
   const handlePress = async () => {
     try {
       if (isRecording) {
-        await stopRecording()
+        const coords = await stopRecording()
+        if (coords.length < 2) {
+          useToastStore.getState().show('error', 'Ruta muy corta para guardar')
+          clearCoords()
+          return
+        }
+        postRoute.mutate(
+          {
+            title: `Ruta ${new Date().toLocaleString('es-CL')}`,
+            track: { type: 'LineString', coordinates: coords },
+          },
+          {
+            onSuccess: () => {
+              useToastStore.getState().show('success', 'Ruta guardada')
+              clearCoords()
+            },
+          }
+        )
       } else {
         await startRecording()
       }
@@ -72,9 +101,10 @@ export default function RecordScreen() {
         styleURL="mapbox://styles/mapbox/dark-v11"
       >
         <Mapbox.Camera
-          centerCoordinate={location ? [location.coords.longitude, location.coords.latitude] : [0, 0]}
-          zoomLevel={location ? 14 : 1}
+          ref={cameraRef}
+          defaultSettings={{ centerCoordinate: [0, 0], zoomLevel: 1 }}
         />
+
         <Mapbox.LocationPuck puckBearingEnabled puckBearing="heading" />
         {coords.length >= 2 && (
           <Mapbox.ShapeSource
@@ -100,6 +130,20 @@ export default function RecordScreen() {
           </Mapbox.ShapeSource>
         )}
       </Mapbox.MapView>
+      <Pressable
+        className="absolute bottom-12 right-4 bg-card px-4 py-3 rounded-full"
+        onPress={() => {
+          if (!location) return
+          cameraRef.current?.setCamera({
+            centerCoordinate: [location.coords.longitude, location.coords.latitude],
+            zoomLevel: 15,
+            heading: 0,
+            animationDuration: 600
+          })
+        }}
+      >
+        <Ionicons name="locate" size={22} color="#FAF3DD" />
+      </Pressable>
       <Pressable
         onPress={() => handlePress()}
         className="absolute bottom-10 self-center px-8 py-4 rounded-full"

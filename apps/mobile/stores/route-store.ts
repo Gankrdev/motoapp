@@ -18,12 +18,15 @@ interface RouteState {
     // acciones
     addCoord: (coord: [number, number]) => void
     startRecording: () => Promise<void>
-    stopRecording: () => Promise<void>
+    stopRecording: () => Promise<[number, number][]>
+    clearCoords: () => void
+
 }
 
-export const useRouteStore = create<RouteState>((set) => ({
+export const useRouteStore = create<RouteState>((set, get) => ({
     isRecording: false,
     coords: [],
+    clearCoords: () => set({ coords: [] }),
 
     addCoord: (coord) => set((state) => ({ coords: [...state.coords, coord] })),
     startRecording: async () => {
@@ -63,6 +66,7 @@ export const useRouteStore = create<RouteState>((set) => ({
     stopRecording: async () => {
         await stopLocationUpdatesAsync(LOCATION_TASK_NAME)
         set({ isRecording: false })
+        return get().coords
     },
 
 }))

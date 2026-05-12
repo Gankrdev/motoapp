@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.js'
 import userRoutes from './routes/users.js'
 import uploadRoutes from './routes/upload.js'
 import postRoutes from './routes/posts.js'
+import routeRoutes from './routes/routes.js'
 
 export function buildApp() {
   const app = Fastify({
@@ -19,6 +20,7 @@ export function buildApp() {
   app.register(userRoutes)
   app.register(uploadRoutes)
   app.register(postRoutes)
+  app.register(routeRoutes)
 
   app.get('/health', async () => {
     return { status: 'ok' }
