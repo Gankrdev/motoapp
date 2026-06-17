@@ -14,11 +14,13 @@ interface RouteState {
     // datos
     isRecording: boolean
     coords: [number, number][]
+    startedAt: number | null
+    accumulatedMs: number
 
     // acciones
     addCoord: (coord: [number, number]) => void
     startRecording: () => Promise<void>
-    stopRecording: () => Promise<[number, number][]>
+    stopRecording: () => Promise<{ coords: [number, number][]; durationSec: number }>
     clearCoords: () => void
 
 }
@@ -26,7 +28,10 @@ interface RouteState {
 export const useRouteStore = create<RouteState>((set, get) => ({
     isRecording: false,
     coords: [],
-    clearCoords: () => set({ coords: [] }),
+    startedAt: null,
+    accumulatedMs: 0,
+
+    clearCoords: () => set({ coords: [], startedAt: null, accumulatedMs: 0 }),
 
     addCoord: (coord) => set((state) => ({ coords: [...state.coords, coord] })),
     startRecording: async () => {
@@ -48,7 +53,7 @@ export const useRouteStore = create<RouteState>((set, get) => ({
             throw new Error("Activa la ubicación en modo 'Todo el tiempo' desde Ajustes para grabar con la pantalla apagada.");
         }
 
-        set({ isRecording: true, coords: [] })
+        set({ isRecording: true, coords: [], startedAt: Date.now(), accumulatedMs: 0 })
 
         await startLocationUpdatesAsync(LOCATION_TASK_NAME, {
             accuracy: Accuracy.BestForNavigation,
@@ -65,8 +70,10 @@ export const useRouteStore = create<RouteState>((set, get) => ({
 
     stopRecording: async () => {
         await stopLocationUpdatesAsync(LOCATION_TASK_NAME)
-        set({ isRecording: false })
-        return get().coords
+        const { startedAt, accumulatedMs, coords } = get()
+        const elapsed = startedAt ? Date.now() - startedAt : 0
+        const durationSec = Math.floor((accumulatedMs + elapsed) / 1000)
+        set({ isRecording: false, startedAt: null })
+        return { coords, durationSec }
     },
-
 }))

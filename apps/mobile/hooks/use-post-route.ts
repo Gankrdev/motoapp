@@ -10,6 +10,7 @@ type CreateRouteInput = {
   title: string
   track: GeoJSONLineString
   durationSec?: number
+  distanceKm?: number
 }
 
 type Route = {

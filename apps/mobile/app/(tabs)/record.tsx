@@ -2,10 +2,12 @@ import { useEffect, useState, useRef } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import * as Location from 'expo-location'
 import Mapbox from '@rnmapbox/maps'
-import {Ionicons} from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
+import { usePendingRouteStore } from '../../stores/pending-route-store'
 import { useRouteStore } from '../../stores/route-store'
 import { useToastStore } from '../../stores/toast-store'
-import { usePostRoute } from '../../hooks/use-post-route'
+import { simplifyTrack } from '../../lib/simplify-track'
 
 Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN!)
 
@@ -17,6 +19,8 @@ export default function RecordScreen() {
   const stopRecording = useRouteStore((state) => state.stopRecording)
   const [permissionMessage, setPermissionMessage] = useState('')
   const cameraRef = useRef<Mapbox.Camera>(null)
+  const router = useRouter()
+  const clearCoords = useRouteStore((state) => state.clearCoords)
 
   useEffect(() => {
     let cancelled = false
@@ -62,30 +66,26 @@ export default function RecordScreen() {
     }
   }, [])
 
-  const postRoute = usePostRoute()
-  const clearCoords = useRouteStore((s) => s.clearCoords)
-
   const handlePress = async () => {
     try {
       if (isRecording) {
-        const coords = await stopRecording()
+        const { coords, durationSec } = await stopRecording()
         if (coords.length < 2) {
           useToastStore.getState().show('error', 'Ruta muy corta para guardar')
           clearCoords()
           return
         }
-        postRoute.mutate(
-          {
-            title: `Ruta ${new Date().toLocaleString('es-CL')}`,
-            track: { type: 'LineString', coordinates: coords },
-          },
-          {
-            onSuccess: () => {
-              useToastStore.getState().show('success', 'Ruta guardada')
-              clearCoords()
-            },
-          }
-        )
+        const simplified = simplifyTrack(coords)
+        console.log(`[SIMPLIFY] ${coords.length} → ${simplified.length} puntos`)
+
+        usePendingRouteStore.getState().setPendingRoute({
+          coords: simplified,
+          durationSec,
+          source: 'recorded',
+          suggestedTitle: `Ruta del ${new Date().toLocaleString('es-CL')}`,
+        })
+        clearCoords()
+        router.push('/route/preview')
       } else {
         await startRecording()
       }
@@ -149,18 +149,18 @@ export default function RecordScreen() {
         className="absolute bottom-10 self-center px-8 py-4 rounded-full"
         style={{ backgroundColor: isRecording ? '#D63A2A' : '#4A7C59' }}
       >
-        <Text className="text-slateText text-lg font-bold">
+        <Text className="text-slateText text-lg font-body-semibold">
           {isRecording ? 'Detener' : 'Iniciar grabación'}
         </Text>
       </Pressable>
       {isRecording && (
         <View className="absolute top-12 self-center bg-card px-4 py-2 rounded-full">
-          <Text className="text-slateText">{coords.length} puntos</Text>
+          <Text className="text-slateText font-body-medium">{coords.length} puntos</Text>
         </View>
       )}
       {permissionMessage !== '' && (
         <View className="absolute top-12 self-center bg-card px-6 py-3 rounded-full">
-          <Text className="text-slateText">{permissionMessage}</Text>
+          <Text className="text-slateText font-body-medium">{permissionMessage}</Text>
         </View>
       )}
     </View>
