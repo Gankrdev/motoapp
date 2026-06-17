@@ -10,6 +10,7 @@ interface CreateRouteInput {
     title: string
     track: GeoJSONLineString
     durationSec?: number
+    distanceKm?: number
 }
 
 export async function createRoute(
@@ -20,12 +21,13 @@ export async function createRoute(
     const trackJson = JSON.stringify(input.track)
 
     const result = await db.execute(sql`
-    INSERT INTO routes (user_id, title, track, duration_sec)
+    INSERT INTO routes (user_id, title, track, duration_sec, distance_km)
     VALUES (
       ${userId}::uuid,
       ${input.title},
       ST_GeomFromGeoJSON(${trackJson}),
-      ${input.durationSec ?? null}
+      ${input.durationSec ?? null},
+      ${input.distanceKm ?? null}
     )
     RETURNING
       id,
