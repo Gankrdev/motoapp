@@ -1,17 +1,23 @@
 import { eq, desc } from 'drizzle-orm'
-import { posts, users, Database } from '@motoapp/db'
+import { posts, users, routes, Database } from '@motoapp/db'
 
-export async function createPost(db: Database, userId: string, caption: string, mediaUrls?: string[]) {
+type CreatePostInput = {
+  caption: string
+  routeId?: string
+  mediaUrls?: string[]
+}
+
+export async function createPost(db: Database, userId: string, input: CreatePostInput) {
   const [post] = await db
     .insert(posts)
-    .values({ userId, caption, mediaUrls })
+    .values({ userId, ...input })
     .returning()
 
   return post
 }
 
 export async function getFeed(db: Database, limit: number, offset: number) {
-  return db
+  const rows = await db
     .select({
       id: posts.id,
       caption: posts.caption,
@@ -24,12 +30,23 @@ export async function getFeed(db: Database, limit: number, offset: number) {
         username: users.username,
         avatarUrl: users.avatarUrl,
       },
+      route: {
+        id: routes.id,
+        distanceKm: routes.distanceKm,
+        durationSec: routes.durationSec,
+      },
     })
     .from(posts)
     .innerJoin(users, eq(posts.userId, users.id))
+    .leftJoin(routes, eq(posts.routeId, routes.id))
     .orderBy(desc(posts.createdAt))
     .limit(limit)
     .offset(offset)
+
+  return rows.map((row) => ({
+    ...row,
+    route: row.route?.id ? row.route : null,
+  }))
 }
 
 export async function getPostById(db: Database, id: string) {

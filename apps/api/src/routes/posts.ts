@@ -5,16 +5,17 @@ import { createPost, getFeed, getPostById, deletePost } from '../services/posts.
 export default async function postRoutes(app: FastifyInstance) {
     // Crear post
     app.post('/posts', { onRequest: [authenticate] }, async (request, reply) => {
-        const { caption, mediaUrls } = request.body as {
+        const { caption, mediaUrls, routeId } = request.body as {
             caption: string
             mediaUrls?: string[]
+            routeId?: string
         }
 
         if (!caption) {
             return reply.status(400).send({ error: 'Caption es requerido' })
         }
 
-        const post = await createPost(app.db, request.user.userId, caption, mediaUrls)
+        const post = await createPost(app.db, request.user.userId, { caption, mediaUrls, routeId })
 
         return reply.status(201).send(post)
     })
