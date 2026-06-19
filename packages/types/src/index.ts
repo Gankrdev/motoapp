@@ -11,5 +11,13 @@ export interface Post {
     likesCount: number,
     commentsCount: number,
     createdAt: string,
-    author: Author
+    author: Author,
+    route: RouteSummary | null
+}
+
+export interface RouteSummary {
+    id: string,
+    title: string,
+    distanceKm: number | null,
+    durationSec: number | null
 }

@@ -32,6 +32,7 @@ export async function getFeed(db: Database, limit: number, offset: number) {
       },
       route: {
         id: routes.id,
+        title: routes.title,
         distanceKm: routes.distanceKm,
         durationSec: routes.durationSec,
       },

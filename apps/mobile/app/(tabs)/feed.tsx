@@ -2,7 +2,6 @@ import { View, Text, FlatList } from 'react-native'
 import { FeedHeader } from '../../components/feed/FeedHeader'
 import { StartAdventureButton } from '../../components/feed/StartAdventureButton'
 import { BikeStatusCard } from '../../components/feed/BikeStatusCard'
-import { LastAdventureCard } from '../../components/feed/LastAdventureCard'
 import { WeatherWidget } from '../../components/feed/WeatherWidget'
 import { usePosts } from '../../hooks/use-posts'
 import { PostCard } from '../../components/feed/PostCard'
@@ -22,10 +21,12 @@ export default function FeedScreen() {
             <WeatherWidget />
             <StartAdventureButton />
             <BikeStatusCard />
+            <View className="mx-6 mt-8">
+              <Text className="text-lg font-extrabold text-slateText tracking-tight mb-4">
+                Last Adventure
+              </Text>
+            </View>
           </>
-        }
-        ListFooterComponent={
-          <LastAdventureCard />
         }
         ListEmptyComponent={
           <Text className='text-white text-center mt-8'>

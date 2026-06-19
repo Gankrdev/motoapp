@@ -38,3 +38,15 @@ export function calculateAvgSpeedKmh(distanceKm: number, durationSec: number): n
     if (durationSec === 0) return 0
     return (distanceKm / durationSec) * 3600
 }
+
+export function formatDurationShort(seconds: number | null): string {
+    if (seconds === null) return ''
+    let h = Math.floor(seconds / 3600)
+    let m = Math.floor((seconds % 3600) / 60)
+    return `${h}h ${m}m`
+}
+
+export function formatDistanceKm(km: number | null): string {
+    if (km === null) return ''
+    return `${Math.round(km)} km`
+}
